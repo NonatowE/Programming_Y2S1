@@ -1,0 +1,120 @@
+Tutorial 3: Player power up
+
+This is a 3D project in a 2D view where it will permit the player to collect cubes which will increase it’s size however, each cube it collects it will also decrease their speed. In the scene, we will need a player game object, a platform and cubes for the player to collect.
+
+The player must have the camera attached to it so it can follow the player, however this is optional.  For the player to move, we must give it a rigidbody which can use gravity and can not rotate to add physics. 
+
+The first script will be the player’s movement creating if statements to be able to move the player left and right using the ‘A’ and ‘D’ key:
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    private Rigidbody rb;
+    private Vector3 moveRight;
+    private Vector3 moveLeft;
+    private bool moveToRight;
+    private bool moveToLeft;
+    void Start()
+    {
+        moveRight = new Vector3(-transform.position.x, 0, 0);
+        moveLeft = new Vector3(transform.position.x, 0, 0);
+        rb = GetComponent<Rigidbody>();
+        // these will give the direction of the player only within the X axis
+    }
+
+    private void FixedUpdate()
+    {
+        if (moveToRight)
+        {
+            rb.AddForce(moveRight * GamePlayManager.instance.playerSpeed, ForceMode.Acceleration);
+        }
+        if (moveToLeft)
+        {
+            rb.AddForce(moveLeft * GamePlayManager.instance.playerSpeed, ForceMode.Acceleration);
+//Will recall the GamePlayManager to add force and change the speed of the player
+        }
+    }
+    void Update()
+    {    
+        //To attach specific keyboard keys using If statements
+        if (Input.GetKey(KeyCode.D))
+        {
+            moveToRight = true;
+        }
+        else
+        {
+            moveToRight = false;
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            moveToLeft = true;
+        }
+        else
+        {
+            moveToLeft = false;
+        }
+    }
+}
+
+Next we will add a empty GameObject and this will be out gameManager. We will give it a script that will be recalled in the player movement: 
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class GamePlayManager : MonoBehaviour
+{
+    public static GamePlayManager instance;
+    public float speedToDeduct = 0.1f;
+    public GameObject player;
+// We must drag the player object into the inspector
+    public float playerSpeed = 10;
+    public Vector3 localScale;
+
+    // We will create public variables so that we can edit the speed deduction and the speed of the player when it interacts with the cubes
+
+    void Start()
+    {
+        localScale = player.transform.localScale;
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            Destroy(this);
+        }
+        DontDestroyOnLoad(this);
+    }
+
+    void Update()
+    {
+
+    }
+}
+
+For the cubes, we will give them a box collider that can be triggered by the player. We will create one more script for the pick up of these cubes. This script must allow the player once triggered, it will cal the GamePlayManagement to allow it to increase the size of the player and destroy the cube once it collides with the player.
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyPickUp : MonoBehaviour
+{
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            GamePlayManager.instance.localScale.x += 0.5f;
+            GamePlayManager.instance.localScale.y += 0.5f;
+            GamePlayManager.instance.localScale.z += 0.5f;
+            GamePlayManager.instance.player.transform.localScale = GamePlayManager.instance.localScale;
+            GamePlayManager.instance.playerSpeed -= GamePlayManager.instance.speedToDeduct;
+            Destroy(gameObject);
+        }
+    }
+}
+
