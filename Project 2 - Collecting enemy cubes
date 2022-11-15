@@ -1,0 +1,184 @@
+Tutorial 2: Collecting
+
+For this project, this will allow the player to collect cubes/enemies and stack them on top. We will need a cube as a player and multiple cubes to be able to be collected in the scene. We will also need a plane or a platform for the player to move around.
+
+For the enemies, you must give it a rigidbody component where they are unable to rotate and can use gravity in the inspector and do this for the player object too. You must also add a box collider that can be triggered.
+
+The first script we must add a character controller for the player to be able to move and interact with it’s surroundings.
+
+The Script:
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    [Header("Movement stuff")]
+    public float moveSpeed = 15f;
+    public float jumpHeight = 5;
+    public float runSpeed = 1;
+
+    [Header("Boolien checks")]
+    public bool isGrounded = false;
+    public bool isJumping = false;
+    public bool isCrouching = false;
+
+    [Header("Collision stuff")]
+    public float sphereRadius = 0.4f;
+    public float sphereMaxDistance;
+    public LayerMask groundMask;
+
+    [Header("Misc")]
+    public float sensitivity = 1f;
+    public BoxCollider playerCollider;//Called from the health script.
+    public GameObject feet;
+    public AudioClip boneBreak;
+    public GameObject stackCube;
+
+    [Header("Camera Stuff")]
+    public float mouseSensitivity = 10;
+    public Transform playerTarget;
+    public Vector3 distanceFromTarget;
+    public Vector2 pitchMinMax = new Vector2(-40, 85);
+    public float rotationSmoothTime = 0.12f;
+    public GameObject playerCamera;
+
+    private Animator animator;
+    private Rigidbody rb;
+    private float hor, ver;
+    private bool isMoving;
+    private Vector3 moveDirection;
+    private int indexSelector;
+    private Vector3 rotationSmoothVelocity;
+    private Vector3 currentRotation;
+    private float yaw;
+    private float pitch;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+        playerCollider = GetComponent<BoxCollider>();
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+    private void Update()
+    {
+        MovementInput();
+        //feet.GetComponent<StepSoundsDetector>().PerformRaycast();
+        GroundDetectionSphereCast();
+        //if (ver != 0&&isJumping==false)
+        //{
+        //    feet.GetComponent<StepSoundsDetector>().PlayAudio();
+        //}
+    }
+    private void FixedUpdate()
+    {
+        Movement();
+    }
+    private void LateUpdate()
+    {
+    }
+    private void GroundDetectionSphereCast()
+    {
+        //This checks if the player is grounded, if the player is grounded they can jump again
+        if (!isGrounded)
+        {
+            RaycastHit hit;
+
+            if (Physics.SphereCast(transform.position, sphereRadius, Vector3.down, out hit, sphereMaxDistance))
+            {
+                if (hit.collider.tag == "Ground" || hit.collider.tag == "Phys" || hit.collider.tag == "HeavyPhys" || hit.collider.tag == "Slope")
+                {
+                    Debug.Log(hit.collider.tag);
+                    isGrounded = true;
+                    isJumping = false;
+                    //feet.GetComponent<StepSoundsDetector>().PlayAudio();
+                }
+            }
+        }
+    }
+
+
+    private void MovementInput() 
+    {
+        hor = Input.GetAxis("Horizontal");
+        ver = Input.GetAxis("Vertical");
+        //This calculates move direction
+        moveDirection = transform.forward * ver + transform.right * hor;
+
+    }
+    private void Movement()
+    {      
+        rb.velocity = moveDirection * moveSpeed * runSpeed;
+    }
+
+    //We use this to check if the player is falling
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Phys" || collision.gameObject.tag == "HeavyPhys" || collision.gameObject.tag == "Slope")
+        {
+            isGrounded = false;
+            isJumping = true;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.relativeVelocity.y > 20)
+        {
+            if (collision.collider.tag != "Bullet"&&collision.collider.tag!="Phys")
+            {
+                rb.velocity = Vector3.zero;
+                feet.GetComponent<AudioSource>().clip = boneBreak;
+                feet.GetComponent<AudioSource>().Play();
+                //GetComponent<PlayerHealth>().TakeDamage(5 * collision.relativeVelocity.y);
+            }
+        }
+    }
+
+    private void CameraMovement()
+    {
+        playerCamera.transform.position = playerTarget.position+distanceFromTarget;
+        yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
+        pitch -= Input.GetAxis("Mouse Y") * mouseSensitivity;
+        pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
+        currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
+        playerCamera.transform.eulerAngles = currentRotation;
+        if (hor > 0||ver>0)
+        {
+             transform.rotation = Quaternion.Euler(0,yaw,0);
+        }
+    }
+}
+
+Then we will add an empty gameobject called objectstack and add it into tube script within the inspector.
+
+The second script will be for the enemies. So the player can pick them up.
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyPickUp : MonoBehaviour
+{
+    public GameObject player;
+
+    private Vector3 playerStackCube;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            playerStackCube = player.GetComponent<PlayerController>().stackCube.transform.position;
+            this.transform.position = playerStackCube;
+            this.GetComponent<BoxCollider>().enabled = false;
+            this.GetComponent<EnemyPickUp>().enabled = false;
+            this.GetComponent<Rigidbody>().isKinematic = true;
+            this.GetComponent<Rigidbody>().useGravity = false;
+            playerStackCube.y += 1f;
+            player.GetComponent<PlayerController>().stackCube.transform.position = playerStackCube;
+            this.transform.SetParent(player.GetComponent<PlayerController>().transform);
+            //This will make it so that when the player interacts with the cubes, they will stack on top of eachother on the player
+        }
+    }
+}
