@@ -8,7 +8,7 @@ Within your scene, create a plane for our ground and a capsule for our player. A
 
 We will be using a component within the player called the character controller. This will allow the player to move depending on the environment without needing to use physics. We will need to create a script also attached to the player called "movement" for the character controller to be used.
 
-*** The Script:
+###### The Script:
 
 using System.Collections;
 using System.Collections.Generic;
