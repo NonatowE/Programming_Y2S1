@@ -3,6 +3,7 @@
 
 
 **4th October 2022**
+
 Starting off, I had to do my work at home dut to circumstances with my work. I thought of what 4 projects I wanted to do. I decided on my first project in which the player can control the character’s movement within a 3D environment in third person. I chose something easy for my first project to help refresh my memory and to not make it too difficult for me. I started by watching tutorials from the likes of Brackeys on youtube and reading through unity documentation for the basics to help my understanding.
 
 
@@ -33,4 +34,9 @@ Feeling burnt out, I couldn’t think of what to do for the last project. I deci
 
 **25th October 2022**
 
-My first lesson in class started off difficult. I used most of my time trying to log in to the computers to find out that everyone is using a different version of unity. I used my time checking a few of my projects to see if it can open in this version. I had also started my logs since I had originally not understood how to do it so I have a friend explain to me how to log my work.
+My first lesson in class started off difficult. I used most of my time trying to log in to the computers to find out that everyone is using a different version of unity. I had not brought my USB so I was unable to open my unity packages except for one which was hidden in my google drive folder. There was a small error where the engine couldn't find something however it still ran perfectly. I had also started my logs since I had originally not understood how to do it so I have a friend explain to me how to log my work.
+
+
+**15th November 2022**
+
+Today I decided to add everything into GitHub. I was initially confused on how to use the website and how to format my work. I had written up my tutorials and my journal through google docs and tried to add it into Github. I was confused by the formatting as I had looked at example journals and they had contained headings, sub headings et. to make their documentation neat. I made a few test files to try out the formatting however I realised I needed to make a read me file for it to be executed. 
