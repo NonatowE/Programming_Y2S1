@@ -1,1 +1,2 @@
-# Programming_Y2S1 - Learning Journal
+# Programming_Y2S1
+## Learning Journal
