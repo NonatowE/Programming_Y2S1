@@ -11,9 +11,7 @@ We will be using a component within the player called the character controller. 
 ###### The Script:
 
 using System.Collections;
-
 using System.Collections.Generic;
-
 using UnityEngine;
 
 
