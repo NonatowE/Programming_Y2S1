@@ -1,0 +1,78 @@
+Tutorial 4: Simple health/armour bar
+
+This project is a script in which the player can attack using a button and affect the health and armour bar. First we must create 2 UI images one which will be the background of the health bar and then the health colour that will decrease. Repeat this this for the armour bar. We must add in a button which can be toggled using the mouse to attack the health bar where we can change the text to “attack”.
+
+We must create a script called health manager into an empty gameobject. In this script, when the button is pressed, it will first damage the armour. Once the the bar is empty, it will begin to decrease the health bar each time the attack button is pressed.
+
+The script:
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+//must add to be able to use UI in the script
+
+public class HealthManager : MonoBehaviour
+{
+
+ 
+    
+    public static HealthManager instance;
+    // This instance has been created so that you can access it from any class/script. So when an an enemy attacks you, they would run the function ApplyDamage in this script
+
+
+    public float Health;
+    public float MaxHealth;
+    public float Armour;
+    public float MaxArmour;
+
+    public Image HealthBar_Current;
+    public Image ArmourBar_Current;
+
+    
+    private void Awake()
+    {
+        instance = this;
+        //  In the awake function, this script will become the instance
+    } 
+
+    public void ApplyDamage(int damageAmount)
+    {
+        if (Armour > 0)
+        {
+            Armour -= damageAmount;           
+        }
+        if (Armour < 0)
+            Armour = 0;
+
+        if (Armour < 1)
+        {
+            Health -= damageAmount;
+        }
+
+        ApplyBarUIEffects();
+
+        // Using if statements, it will subtract the armour first before it attacks the health
+    }
+    
+    public void ApplyBarUIEffects()
+    {
+        HealthBar_Current.fillAmount = Health / MaxHealth;
+        ArmourBar_Current.fillAmount = Armour / MaxArmour;
+
+        if (Health < 1)
+        {
+            Death();
+        }
+        // If the health is lower than 1, health cannot decrease even further thus causing the death function
+    }
+
+    public void Death()
+    {
+        Debug.Log("You are dead!");
+
+    // When this is executed, the debug log will say "you are dead" 
+    }
+}
+
+For the button on click, we must add the health manager to be able to function the button to attack
